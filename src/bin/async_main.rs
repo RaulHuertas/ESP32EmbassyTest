@@ -1,13 +1,23 @@
 #![no_std]
 #![no_main]
 
-use embassy_executor::Spawner;
+use embassy_executor::{Spawner,task};
 use embassy_time::{Duration, Timer};
 use esp_backtrace as _;
 use esp_hal::prelude::*;
 use log::info;
 
 extern crate alloc;
+
+
+#[embassy_executor::task]
+/// Task that ticks periodically
+async fn tick_periodic() -> ! {
+    loop {
+        info!("I'm the periodic task!");
+        Timer::after(Duration::from_millis(2000)).await;
+    }
+}
 
 #[main]
 async fn main(spawner: Spawner) {
@@ -35,7 +45,8 @@ async fn main(spawner: Spawner) {
     .unwrap();
 
     // TODO: Spawn some tasks
-    let _ = spawner;
+    //let _ = spawner;
+    spawner.spawn(tick_periodic()).unwrap();
 
     loop {
         info!("Hello Raul Huertas!");
